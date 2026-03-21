@@ -16,6 +16,8 @@ import (
 
 // UserHandler returns info about the logged in user
 func (h *Handler) UserHandler(w http.ResponseWriter, _ *http.Request, _ *models.Preference, user *models.User, _ models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		obj := "user data"
 		h.log.Error(models.ErrEncoding(err, obj))

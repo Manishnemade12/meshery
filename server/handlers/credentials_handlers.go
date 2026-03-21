@@ -13,6 +13,8 @@ import (
 )
 
 func (h *Handler) SaveUserCredential(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	bd, err := io.ReadAll(req.Body)
 	token, _ := req.Context().Value(models.TokenCtxKey).(string)
 	if err != nil {
@@ -100,6 +102,8 @@ func (h *Handler) GetUserCredentials(w http.ResponseWriter, req *http.Request, _
 }
 
 func (h *Handler) UpdateUserCredential(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	bd, err := io.ReadAll(req.Body)
 	if err != nil {
 		h.log.Error(fmt.Errorf("error reading request body: %v", err))
@@ -131,6 +135,8 @@ func (h *Handler) UpdateUserCredential(w http.ResponseWriter, req *http.Request,
 }
 
 func (h *Handler) DeleteUserCredential(w http.ResponseWriter, req *http.Request, _ *models.Preference, _ *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	q := req.URL.Query()
 
 	credentialID := uuid.FromStringOrNil(q.Get("credential_id"))

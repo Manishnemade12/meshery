@@ -130,6 +130,8 @@ func (h *Handler) handleRegistrationInitEvent(w http.ResponseWriter, req *http.R
 // responses:
 // 201: noContentWrapper
 func (h *Handler) SaveConnection(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	bd, err := io.ReadAll(req.Body)
 	userID := user.ID
 	if err != nil {
@@ -205,6 +207,8 @@ func (h *Handler) SaveConnection(w http.ResponseWriter, req *http.Request, _ *mo
 // responses:
 // 200: mesheryConnectionsResponseWrapper
 func (h *Handler) GetConnections(w http.ResponseWriter, req *http.Request, prefObj *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	q := req.URL.Query()
 	page, _ := strconv.Atoi(q.Get("page"))
 	order := q.Get("order")
@@ -342,6 +346,8 @@ func (h *Handler) GetConnectionsByKind(w http.ResponseWriter, req *http.Request,
 // responses:
 // 200: mesheryConnectionResponseWrapper
 func (h *Handler) GetConnectionByID(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	connectionID := uuid.FromStringOrNil(mux.Vars(req)["connectionId"])
 	if connectionID == uuid.Nil {
 		h.log.Error(ErrGetConnections(fmt.Errorf("invalid connection ID")))
@@ -565,6 +571,8 @@ func (h *Handler) NotifySmOfConnectionStatusChange(context context.Context, user
 // responses:
 // 200: noContentWrapper
 func (h *Handler) DeleteConnection(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
+	w.Header().Set("Content-Type", "application/json")
+
 	connectionID := uuid.FromStringOrNil(mux.Vars(req)["connectionId"])
 	userID := user.ID
 	eventBuilder := events.NewEvent().ActedUpon(connectionID).FromUser(userID).FromSystem(*h.SystemID).WithCategory("connection").WithAction("delete")
