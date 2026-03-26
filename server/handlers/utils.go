@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+
+	"github.com/meshery/meshery/server/models"
 )
 
 const (
@@ -13,13 +15,18 @@ const (
 func getPaginationParams(req *http.Request) (page, offset, limit int, search, order, sortOnCol, status string) {
 
 	urlValues := req.URL.Query()
-	page, _ = strconv.Atoi(urlValues.Get("page"))
-	limitstr := urlValues.Get("pagesize")
-	if limitstr != "all" {
-		limit, _ = strconv.Atoi(limitstr)
-		if limit == 0 {
-			limit = defaultPageSize
-		}
+
+	p, err := models.ParsePagination(req)
+	if err == nil {
+		page = p.Page
+		limit = p.PageSize
+	} else {
+		page = 0
+		limit = defaultPageSize
+	}
+
+	if urlValues.Get("pagesize") == "all" {
+		limit = 100
 	}
 
 	search = urlValues.Get("search")
@@ -27,9 +34,6 @@ func getPaginationParams(req *http.Request) (page, offset, limit int, search, or
 	sortOnCol = urlValues.Get("sort")
 	status = urlValues.Get("status")
 
-	if page < 0 {
-		page = 0
-	}
 	offset = page * limit
 
 	if sortOnCol == "" {

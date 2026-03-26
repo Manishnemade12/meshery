@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
@@ -65,20 +64,21 @@ func (h *Handler) GetUserCredentialByID(w http.ResponseWriter, req *http.Request
 func (h *Handler) GetUserCredentials(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
 	q := req.URL.Query()
 
-	page, _ := strconv.Atoi(q.Get("page"))
-	order := q.Get("order")
-	search := q.Get("search")
-	pageSize, _ := strconv.Atoi(q.Get("page_size"))
+	pagination, err := models.ParsePagination(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	page := pagination.Page
+	pageSize := pagination.PageSize
 
 	if pageSize > 25 {
 		pageSize = 25
 	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if page < 0 {
-		page = 0
-	}
+	order := q.Get("order")
+	search := q.Get("search")
+
+	order = models.SanitizeOrderInput(order, []string{"created_at", "updated_at", "name", "type"})
 	if order == "" {
 		order = "created_at desc"
 	}

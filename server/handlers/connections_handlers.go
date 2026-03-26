@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -206,34 +205,27 @@ func (h *Handler) SaveConnection(w http.ResponseWriter, req *http.Request, _ *mo
 // 200: mesheryConnectionsResponseWrapper
 func (h *Handler) GetConnections(w http.ResponseWriter, req *http.Request, prefObj *models.Preference, user *models.User, provider models.Provider) {
 	q := req.URL.Query()
-	page, _ := strconv.Atoi(q.Get("page"))
+	pagination, err := models.ParsePagination(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	page := pagination.Page
+	pageSize := pagination.PageSize
+
+	if q.Get("pagesize") == "all" || pageSize > 100 {
+		pageSize = 100
+	}
+
 	order := q.Get("order")
 	search := q.Get("search")
-	pageSizeStr := q.Get("pagesize")
 	filter := q.Get("filter")
 	name := q.Get("name")
-
-	var pageSize int
-	if pageSizeStr == "all" {
-		pageSize = 100
-	} else {
-		pageSize, _ = strconv.Atoi(pageSizeStr)
-	}
-
-	if pageSize > 100 {
-		pageSize = 100
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if page < 0 {
-		page = 0
-	}
 	if order == "" {
 		order = "updated_at desc"
 	}
 
-	err := req.ParseForm()
+	err = req.ParseForm()
 	if err != nil {
 		h.log.Error(ErrGetConnections(err))
 		http.Error(w, ErrGetConnections(err).Error(), http.StatusInternalServerError)
@@ -298,20 +290,21 @@ func (h *Handler) GetConnections(w http.ResponseWriter, req *http.Request, prefO
 func (h *Handler) GetConnectionsByKind(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
 	q := req.URL.Query()
 	connectionKind := mux.Vars(req)["connectionKind"]
-	page, _ := strconv.Atoi(q.Get("page"))
-	order := q.Get("order")
-	search := q.Get("search")
-	pageSize, _ := strconv.Atoi(q.Get("pagesize"))
+	pagination, err := models.ParsePagination(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	page := pagination.Page
+	pageSize := pagination.PageSize
 
 	if pageSize > 25 {
 		pageSize = 25
 	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if page < 0 {
-		page = 0
-	}
+
+	order := q.Get("order")
+	search := q.Get("search")
+
 	if order == "" {
 		order = "updated_at desc"
 	}
