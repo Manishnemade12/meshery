@@ -42,7 +42,11 @@ func (h *Handler) SaveUserCredential(w http.ResponseWriter, req *http.Request, _
 	}
 
 	h.log.Info("Credential saved.", createdCredential.Name, createdCredential.ID)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(createdCredential); err != nil {
+		h.log.Error(fmt.Errorf("error encoding credential: %v", err))
+	}
 }
 
 func (h *Handler) GetUserCredentialByID(w http.ResponseWriter, req *http.Request, _ *models.Preference, user *models.User, provider models.Provider) {
@@ -55,6 +59,7 @@ func (h *Handler) GetUserCredentialByID(w http.ResponseWriter, req *http.Request
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(credential); err != nil {
 		h.log.Error(models.ErrMarshal(err, "credential"))
 		http.Error(w, "unable to encode user credentials", http.StatusInternalServerError)
@@ -79,6 +84,7 @@ func (h *Handler) GetUserCredentials(w http.ResponseWriter, req *http.Request, _
 	if page < 0 {
 		page = 0
 	}
+	order = models.SanitizeOrderInput(order, []string{"created_at", "updated_at", "name", "type"})
 	if order == "" {
 		order = "created_at desc"
 	}
@@ -92,6 +98,7 @@ func (h *Handler) GetUserCredentials(w http.ResponseWriter, req *http.Request, _
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(credentialsPage); err != nil {
 		h.log.Error(fmt.Errorf("error encoding user credentials: %v", err))
 		http.Error(w, "unable to encode user credentials", http.StatusInternalServerError)
@@ -127,6 +134,7 @@ func (h *Handler) UpdateUserCredential(w http.ResponseWriter, req *http.Request,
 	}
 
 	h.log.Info("Credential updated.")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -142,5 +150,6 @@ func (h *Handler) DeleteUserCredential(w http.ResponseWriter, req *http.Request,
 	}
 
 	h.log.Info("Credential deleted.")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
