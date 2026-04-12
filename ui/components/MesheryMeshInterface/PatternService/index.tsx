@@ -1,22 +1,21 @@
-// @ts-check
 import React from 'react';
 import RJSFWrapper from './RJSF_wrapper';
+import type {
+  MesheryRJSFFormData,
+  MesheryRJSFSchema,
+} from '../../types/design';
 
-/**
- * PatternService returns a component for the given jsonSchema
- * @param {{
- *  jsonSchema: Record<string, any>;
- *  onChange: Function;
- *  onSubmit?: Function;
- *  onDelete?: Function;
- *  type: "trait" | "workload"
- *  formData: Record<string, any>;
- *  RJSFWrapperComponent?: any;
- *  RJSFFormChildComponent?: any;
- * }} props
- *
- * @returns
- */
+type PatternServiceProps = {
+  jsonSchema: MesheryRJSFSchema;
+  onChange: (_formData: MesheryRJSFFormData) => void;
+  onSubmit?: (_formData: MesheryRJSFFormData) => void;
+  onDelete?: (_formData: MesheryRJSFFormData) => void;
+  type: 'trait' | 'workload';
+  formData: MesheryRJSFFormData;
+  RJSFWrapperComponent?: React.ElementType;
+  RJSFFormChildComponent?: React.ElementType;
+};
+
 function PatternService({
   formData,
   jsonSchema,
@@ -26,8 +25,10 @@ function PatternService({
   onDelete,
   RJSFWrapperComponent,
   RJSFFormChildComponent,
-}) {
-  if (Object.keys(jsonSchema?.properties).length > 0)
+}: PatternServiceProps) {
+  const properties = jsonSchema?.properties ?? {};
+
+  if (Object.keys(properties).length > 0)
     return (
       <RJSFWrapper
         formData={formData}
