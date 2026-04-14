@@ -99,18 +99,6 @@ func (h *Handler) GetSystemDatabase(w http.ResponseWriter, r *http.Request, _ *m
 	}
 }
 
-// swagger:route DELETE /api/system/database/reset ResetSystemDatabase
-// Reset the system database to its initial state.
-//
-// This endpoint resets the system database to its initial state by performing the following steps:
-// - Creates an archive of the current database contents.
-// - Drops all existing tables in the database.
-// - Applies auto migration to recreate the necessary tables.
-//
-// responses:
-//   200:
-//   500:
-
 // Reset the system database to its initial state.
 func (h *Handler) ResetSystemDatabase(w http.ResponseWriter, r *http.Request, _ *models.Preference, _ *models.User, provider models.Provider) {
 
